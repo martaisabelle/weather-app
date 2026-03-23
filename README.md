@@ -1,6 +1,6 @@
 # weather-app
 
-![Screenshot](assets/screenshot.png)
+![Screenshot](assets/screenshot.jpg)
 
 Aplicação web que mostra o clima atual usando geolocalização automática ou busca manual de cidades.
 
