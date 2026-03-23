@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="icon" type="image/png" href="assets/icon.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Clima</h1>
+            <p id="location">Detectando localização...</p>
+        </header>
+
+        <div class="search-box">
+            <input type="text" id="cityInput" placeholder="Buscar cidade...">
+            <button id="searchBtn">Buscar</button>
+        </div>
+
+        <main id="weatherInfo" class="weather-card hidden">
+            <div class="temp-primary">
+                <span id="temp">--°</span>
+                <span id="unit">C</span>
+            </div>
+            <div class="feelslike">
+                <span>Sensação: </span>
+                <span id="feelslike">--°</span>
+            </div>
+            <div class="details">
+                <p><strong id="city"></strong>, <span id="region"></span></p>
+            </div>
+        </main>
+
+        <footer>
+    Feito com WeatherAPI.com [API REST]<br>
+    <small>Por Marta Isabelle</small>
+</footer>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

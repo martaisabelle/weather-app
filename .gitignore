@@ -1,0 +1,26 @@
+# Dependências
+node_modules/
+npm-debug.log*
+
+# API Keys
+.env
+*.env
+
+# IDEs
+.vscode/
+.idea/
+
+# SO
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Builds
+dist/
+build/
+
+# Server
+server/node_modules/
