@@ -18,7 +18,7 @@ Criei esta aplicação para praticar consumo de APIs REST com JavaScript puro. U
 Aprendi a ler documentação de API, tratar erros CORS e fazer deploy em produção.
 
 ## Funcionalidades
-- Geolocalização automática (detecta Natal RN)
+- Geolocalização automática
 - Busca cidades em português e inglês
 - Design responsivo mobile-first
 - HTTPS production-ready
