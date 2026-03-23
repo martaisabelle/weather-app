@@ -2,7 +2,9 @@
 // - Current: http://api.weatherapi.com/v1/current.json?key=KEY&q=LOCATION (localização, temp_c, feelslike_c, name, region) [web:14][web:17]
 // - Search: http://api.weatherapi.com/v1/search.json?key=KEY&q=CITY (busca cidades)
 
-const API_BASE = 'http://localhost:3001';
+// WeatherAPI.com DIRETO (sem servidor)
+const API_KEY = 'f2e7f458da914ce296831541262303';
+const API_BASE = 'http://api.weatherapi.com/v1';
 
 // DOM Elements
 const cityInput = document.getElementById('cityInput');
@@ -16,29 +18,27 @@ const feelslikeEl = document.getElementById('feelslike');
 
 let currentLocation = '';
 
-// Proxy Weather API 
+// API DIRETA (funciona em QUALQUER lugar!)
 async function fetchWeather(query) {
     try {
         locationEl.textContent = 'Carregando...';
         weatherInfo.classList.add('hidden');
 
-        // PROXY URL (sem API_KEY exposta)
-        const url = `${API_BASE}/weather/${encodeURIComponent(query)}`;
+        const url = `${API_BASE}/current.json?key=${API_KEY}&q=${encodeURIComponent(query)}&aqi=no`;
         const response = await fetch(url);
 
         if (!response.ok) {
-            throw new Error('Cidade não encontrada ou erro no proxy');
+            throw new Error('Cidade não encontrada');
         }
 
         const data = await response.json();
         displayWeather(data);
     } catch (error) {
         locationEl.textContent = 'Erro: ' + error.message;
-        console.error('Proxy Error:', error);
+        console.error('API Error:', error);
     }
 }
 
-// Display Weather Data
 function displayWeather(data) {
     const loc = data.location;
     const curr = data.current;
@@ -54,7 +54,6 @@ function displayWeather(data) {
     weatherInfo.classList.remove('hidden');
 }
 
-// HTML5 Geolocation
 function getGeolocation() {
     if (!navigator.geolocation) {
         locationEl.textContent = 'Geolocalização não suportada';
@@ -68,13 +67,11 @@ function getGeolocation() {
         },
         (error) => {
             locationEl.textContent = 'Permita localização ou busque manualmente';
-            console.error('Geolocation Error:', error);
         },
         { enableHighAccuracy: true, timeout: 10000 }
     );
 }
 
-// Event Listeners
 searchBtn.addEventListener('click', () => {
     const query = cityInput.value.trim();
     if (query) {
@@ -87,5 +84,4 @@ cityInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') searchBtn.click();
 });
 
-// Initialize
 getGeolocation();
