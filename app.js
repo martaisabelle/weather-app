@@ -4,7 +4,7 @@
 
 // WeatherAPI.com DIRETO (sem servidor)
 const API_KEY = 'f2e7f458da914ce296831541262303';
-const API_BASE = 'http://api.weatherapi.com/v1';
+const API_BASE = 'https://api.weatherapi.com/v1';
 
 // DOM Elements
 const cityInput = document.getElementById('cityInput');
