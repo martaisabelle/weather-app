@@ -2,7 +2,7 @@
 // - Current: http://api.weatherapi.com/v1/current.json?key=KEY&q=LOCATION (localização, temp_c, feelslike_c, name, region) [web:14][web:17]
 // - Search: http://api.weatherapi.com/v1/search.json?key=KEY&q=CITY (busca cidades)
 
-// WeatherAPI.com DIRETO (sem servidor)
+// WeatherAPI.com (sem servidor)
 const API_KEY = 'f2e7f458da914ce296831541262303';
 const API_BASE = 'https://api.weatherapi.com/v1';
 
@@ -18,7 +18,14 @@ const feelslikeEl = document.getElementById('feelslike');
 
 let currentLocation = '';
 
-// API DIRETA (funciona em QUALQUER lugar!)
+// função para remover acentos
+function normalizeText(text) {
+    return text
+        .normalize("NFD") // separa acento da letra
+        .replace(/[\u0300-\u036f]/g, ""); // remove acentos
+}
+
+// API
 async function fetchWeather(query) {
     try {
         locationEl.textContent = 'Carregando...';
@@ -65,23 +72,28 @@ function getGeolocation() {
             const { latitude, longitude } = position.coords;
             await fetchWeather(`${latitude},${longitude}`);
         },
-        (error) => {
+        () => {
             locationEl.textContent = 'Permita localização ou busque manualmente';
         },
         { enableHighAccuracy: true, timeout: 10000 }
     );
 }
 
+// Busca com normalização
 searchBtn.addEventListener('click', () => {
-    const query = cityInput.value.trim();
-    if (query) {
+    const rawQuery = cityInput.value.trim();
+
+    if (rawQuery) {
+        const query = normalizeText(rawQuery.toLowerCase());
         fetchWeather(query);
         cityInput.value = '';
     }
 });
 
+// Enter para buscar
 cityInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') searchBtn.click();
 });
 
+// Inicializa com geolocalização
 getGeolocation();

@@ -173,3 +173,13 @@ footer small {
     .search-box { flex-direction: column; gap: 12px; }
     #searchBtn { width: 100%; }
 }
+
+@media (max-width: 480px) {
+    .search-box {
+        flex-direction: column;
+    }
+
+    #searchBtn {
+        width: 100%;
+    }
+}
