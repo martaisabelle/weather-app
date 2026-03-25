@@ -16,7 +16,7 @@ const regionEl = document.getElementById('region');
 const tempEl = document.getElementById('temp');
 const feelslikeEl = document.getElementById('feelslike');
 
-// 🆕 Skeleton
+// Skeleton
 const skeleton = document.getElementById('skeleton');
 const realContent = document.getElementById('realContent');
 
@@ -34,7 +34,7 @@ async function fetchWeather(query) {
     try {
         locationEl.textContent = 'Carregando...';
 
-        // 🆕 mostrar card + skeleton
+        // mostrar card + skeleton
         weatherInfo.classList.remove('hidden');
         skeleton.style.display = 'block';
         realContent.style.display = 'none';
@@ -52,7 +52,7 @@ async function fetchWeather(query) {
     } catch (error) {
         locationEl.textContent = 'Erro: ' + error.message;
 
-        // 🆕 esconder skeleton em caso de erro
+        // esconder skeleton em caso de erro
         skeleton.style.display = 'none';
         realContent.style.display = 'none';
 
@@ -72,7 +72,7 @@ function displayWeather(data) {
     tempEl.textContent = Math.round(curr.temp_c);
     feelslikeEl.textContent = Math.round(curr.feelslike_c) + '°';
 
-    // 🆕 trocar skeleton pelo conteúdo real
+    // trocar skeleton pelo conteúdo real
     skeleton.style.display = 'none';
     realContent.style.display = 'block';
 
