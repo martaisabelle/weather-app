@@ -22,37 +22,76 @@ const realContent = document.getElementById('realContent');
 
 let currentLocation = '';
 
-// função para remover acentos
-function normalizeText(text) {
+// corrige encoding bugado (LeÃ³n → León)
+function fixEncoding(text) {
+    try {
+        return decodeURIComponent(escape(text));
+    } catch {
+        return text;
+    }
+}
+
+// remove acento (fallback interno)
+function removeAccents(text) {
     return text
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "");
 }
 
-// API
+// API COMPLETA (busca inteligente + fallback)
 async function fetchWeather(query) {
     try {
         locationEl.textContent = 'Carregando...';
 
-        // mostrar card + skeleton
+        // mostrar skeleton
         weatherInfo.classList.remove('hidden');
         skeleton.style.display = 'block';
         realContent.style.display = 'none';
 
-        const url = `${API_BASE}/current.json?key=${API_KEY}&q=${encodeURIComponent(query)}&aqi=no`;
-        const response = await fetch(url);
+        let searchData = [];
 
-        if (!response.ok) {
+        // tentativa 1 (com acento)
+        let searchUrl = `${API_BASE}/search.json?key=${API_KEY}&q=${encodeURIComponent(query)}`;
+        let searchResponse = await fetch(searchUrl);
+
+        if (searchResponse.ok) {
+            searchData = await searchResponse.json();
+        }
+
+        // tentativa 2 (sem acento)
+        if (!searchData.length) {
+            const normalized = removeAccents(query);
+
+            searchUrl = `${API_BASE}/search.json?key=${API_KEY}&q=${encodeURIComponent(normalized)}`;
+            searchResponse = await fetch(searchUrl);
+
+            if (searchResponse.ok) {
+                searchData = await searchResponse.json();
+            }
+        }
+
+        if (!searchData.length) {
             throw new Error('Cidade não encontrada');
         }
 
-        const data = await response.json();
+        // melhor resultado
+        const bestMatch = searchData[0];
+        const { lat, lon } = bestMatch;
+
+        // busca clima pela localização exata
+        const weatherUrl = `${API_BASE}/current.json?key=${API_KEY}&q=${lat},${lon}&aqi=no`;
+        const weatherResponse = await fetch(weatherUrl);
+
+        if (!weatherResponse.ok) {
+            throw new Error('Erro ao obter clima');
+        }
+
+        const data = await weatherResponse.json();
         displayWeather(data);
 
     } catch (error) {
         locationEl.textContent = 'Erro: ' + error.message;
 
-        // esconder skeleton em caso de erro
         skeleton.style.display = 'none';
         realContent.style.display = 'none';
 
@@ -60,25 +99,30 @@ async function fetchWeather(query) {
     }
 }
 
+// UI
 function displayWeather(data) {
     const loc = data.location;
     const curr = data.current;
 
-    currentLocation = `${loc.name}, ${loc.region}`;
+    const city = fixEncoding(loc.name);
+    const region = fixEncoding(loc.region);
+
+    currentLocation = `${city}, ${region}`;
     locationEl.textContent = currentLocation;
 
-    cityEl.textContent = loc.name;
-    regionEl.textContent = loc.region;
+    cityEl.textContent = city;
+    regionEl.textContent = region;
+
     tempEl.textContent = Math.round(curr.temp_c);
     feelslikeEl.textContent = Math.round(curr.feelslike_c) + '°';
 
-    // trocar skeleton pelo conteúdo real
     skeleton.style.display = 'none';
     realContent.style.display = 'block';
 
     weatherInfo.classList.remove('hidden');
 }
 
+// Geolocalização
 function getGeolocation() {
     if (!navigator.geolocation) {
         locationEl.textContent = 'Geolocalização não suportada';
@@ -97,21 +141,20 @@ function getGeolocation() {
     );
 }
 
-// Busca com normalização
+// busca (mantém acento)
 searchBtn.addEventListener('click', () => {
     const rawQuery = cityInput.value.trim();
 
     if (rawQuery) {
-        const query = normalizeText(rawQuery.toLowerCase());
-        fetchWeather(query);
+        fetchWeather(rawQuery);
         cityInput.value = '';
     }
 });
 
-// Enter para buscar
+// Enter
 cityInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') searchBtn.click();
 });
 
-// Inicializa com geolocalização
+// Init
 getGeolocation();

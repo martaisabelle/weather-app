@@ -46,6 +46,7 @@ header h1 {
     background: linear-gradient(135deg, #ffffff, #e0e0e0);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 header p {
@@ -58,6 +59,7 @@ header p {
     display: flex;
     margin: 30px 0;
     gap: 10px;
+    position: relative;
 }
 
 #cityInput {
@@ -90,7 +92,7 @@ header p {
     color: white;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 5px 15px rgba(30, 58, 138, 0.4);
 }
 
@@ -103,22 +105,22 @@ header p {
     transform: scale(0.97);
 }
 
+/* WEATHER CARD - TAMANHO FIXO */
 .weather-card {
     margin: 30px 0;
     padding: 40px 20px;
     border-radius: 20px;
-    background: rgba(255, 255, 255, 0.12); /* mais contraste */
+    background: rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
-
-    min-height: 220px;
-    max-height: 220px;
-
+    
+    /* TAMANHO FIXO 240px */
+    height: 240px;
     display: flex;
-    flex-direction: column;
+    flex-direction:  column;
     justify-content: center;
-
-    transition: all 0.5s ease;
+    align-items: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .weather-card.hidden {
@@ -149,7 +151,9 @@ header p {
     font-size: 1.4rem;
     font-weight: 400;
     line-height: 1.3;
-    white-space: normal;
+    max-width: 280px;
+    word-wrap: break-word;
+    text-align: center;
 }
 
 #city {
@@ -160,69 +164,61 @@ footer {
     margin-top: 30px;
     font-size: 0.85rem;
     opacity: 0.6;
+    font-weight: 300;
 }
 
 footer small {
     font-size: 0.75rem;
-}
-
-/* RESPONSIVO */
-@media (max-width: 480px) {
-    .container {
-        padding: 30px 20px;
-    }
-
-    .temp-primary {
-        font-size: 3.5rem;
-    }
-
-    header h1 {
-        font-size: 1.8rem;
-    }
-
-    .search-box {
-        flex-direction: column;
-    }
-
-    #searchBtn {
-        width: 100%;
-    }
+    opacity: 0.7;
 }
 
 /* SKELETON */
-.skeleton-card {
-    display: none;
-}
-
 .skeleton {
-    background: linear-gradient(
-        90deg,
-        rgba(255,255,255,0.08) 25%,
-        rgba(255,255,255,0.2) 50%,
-        rgba(255,255,255,0.08) 75%
-    );
+    background: linear-gradient(90deg, rgba(255,255,255,0.08) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.08) 75%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
-    border-radius: 10px;
+    border-radius: 12px;
+    margin: 12px auto;
 }
 
-.skeleton-temp {
-    width: 120px;
-    height: 60px;
-    margin: 0 auto 20px;
+.skeleton-temp { 
+    width: 120px; 
+    height: 70px; 
+    margin: 0 auto 16px; 
+    border-radius: 16px; 
 }
 
-.skeleton-line {
-    width: 80%;
-    height: 20px;
-    margin: 10px auto;
+.skeleton-feelslike { 
+    width: 80%; 
+    height: 20px; 
+    margin: 0 auto 12px; 
 }
 
-.skeleton-line.small {
-    width: 60%;
+.skeleton-city { 
+    width: 70%; 
+    height: 24px; 
 }
 
 @keyframes shimmer {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
+}
+
+/* RESPONSIVO */
+@media (max-width: 480px) {
+    .container { 
+        padding: 30px 20px; 
+        margin: 10px; 
+    }
+    .temp-primary { font-size: 3.5rem; }
+    header h1 { font-size: 1.8rem; }
+    .search-box { 
+        flex-direction: column; 
+        gap: 12px; 
+    }
+    #searchBtn { width: 100%; }
+}
+
+@media (max-width: 360px) {
+    .temp-primary { font-size: 3rem; }
 }
