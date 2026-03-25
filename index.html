@@ -20,18 +20,28 @@
         </div>
 
         <main id="weatherInfo" class="weather-card hidden">
-            <div class="temp-primary">
-                <span id="temp">--°</span>
-                <span id="unit">C</span>
-            </div>
-            <div class="feelslike">
-                <span>Sensação: </span>
-                <span id="feelslike">--°</span>
-            </div>
-            <div class="details">
-                <p><strong id="city"></strong>, <span id="region"></span></p>
-            </div>
-        </main>
+
+    <div id="skeleton" class="skeleton-card">
+        <div class="skeleton skeleton-temp"></div>
+        <div class="skeleton skeleton-line"></div>
+        <div class="skeleton skeleton-line small"></div>
+    </div>
+
+    <div id="realContent">
+        <div class="temp-primary">
+            <span id="temp">--°</span>
+            <span id="unit">C</span>
+        </div>
+        <div class="feelslike">
+            <span>Sensação: </span>
+            <span id="feelslike">--°</span>
+        </div>
+        <div class="details">
+            <p><strong id="city"></strong>, <span id="region"></span></p>
+        </div>
+    </div>
+
+</main>
 
         <footer>
     Feito com WeatherAPI.com [API REST]<br>

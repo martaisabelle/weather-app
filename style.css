@@ -46,7 +46,6 @@ header h1 {
     background: linear-gradient(135deg, #ffffff, #e0e0e0);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    background-clip: text;
 }
 
 header p {
@@ -83,6 +82,7 @@ header p {
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
 }
 
+/* 🔥 BOTÃO MELHORADO */
 #searchBtn {
     padding: 14px 24px;
     border: none;
@@ -91,8 +91,8 @@ header p {
     color: white;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 1rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 5px 15px rgba(30, 58, 138, 0.4);
 }
 
 #searchBtn:hover {
@@ -100,13 +100,26 @@ header p {
     box-shadow: 0 10px 25px rgba(124, 205, 236, 0.4);
 }
 
+#searchBtn:active {
+    transform: scale(0.97);
+}
+
+/* 🔥 CARD MAIS DESTACADO */
 .weather-card {
     margin: 30px 0;
     padding: 40px 20px;
     border-radius: 20px;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.12); /* mais contraste */
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
+
+    min-height: 220px;
+    max-height: 220px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
     transition: all 0.5s ease;
 }
 
@@ -115,11 +128,13 @@ header p {
     transform: scale(0.95);
 }
 
+/* 🔥 TEMPERATURA MAIS PREMIUM */
 .temp-primary {
     font-size: 4.5rem;
     font-weight: 300;
     margin-bottom: 10px;
     line-height: 1;
+    letter-spacing: -2px;
 }
 
 #unit {
@@ -133,11 +148,15 @@ header p {
     margin-bottom: 20px;
 }
 
+/* 🔥 TEXTO AGORA QUEBRA (mais bonito) */
 .details p {
     font-size: 1.4rem;
     font-weight: 400;
+    line-height: 1.3;
+    white-space: normal;
 }
 
+/* mantém destaque no nome */
 #city {
     font-weight: 500;
 }
@@ -146,35 +165,26 @@ footer {
     margin-top: 30px;
     font-size: 0.85rem;
     opacity: 0.6;
-    font-weight: 300;
 }
 
 footer small {
     font-size: 0.75rem;
-    opacity: 0.7;
 }
 
+/* 📱 RESPONSIVO */
 @media (max-width: 480px) {
     .container {
         padding: 30px 20px;
-        margin: 10px;
     }
-    
+
     .temp-primary {
         font-size: 3.5rem;
     }
-    
+
     header h1 {
         font-size: 1.8rem;
     }
-}
-@media (max-width: 360px) {
-    .temp-primary { font-size: 3rem; }
-    .search-box { flex-direction: column; gap: 12px; }
-    #searchBtn { width: 100%; }
-}
 
-@media (max-width: 480px) {
     .search-box {
         flex-direction: column;
     }
@@ -182,4 +192,42 @@ footer small {
     #searchBtn {
         width: 100%;
     }
+}
+
+/* 🦴 SKELETON */
+.skeleton-card {
+    display: none;
+}
+
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        rgba(255,255,255,0.08) 25%,
+        rgba(255,255,255,0.2) 50%,
+        rgba(255,255,255,0.08) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 10px;
+}
+
+.skeleton-temp {
+    width: 120px;
+    height: 60px;
+    margin: 0 auto 20px;
+}
+
+.skeleton-line {
+    width: 80%;
+    height: 20px;
+    margin: 10px auto;
+}
+
+.skeleton-line.small {
+    width: 60%;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }

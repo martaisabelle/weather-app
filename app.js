@@ -16,20 +16,28 @@ const regionEl = document.getElementById('region');
 const tempEl = document.getElementById('temp');
 const feelslikeEl = document.getElementById('feelslike');
 
+// 🆕 Skeleton
+const skeleton = document.getElementById('skeleton');
+const realContent = document.getElementById('realContent');
+
 let currentLocation = '';
 
 // função para remover acentos
 function normalizeText(text) {
     return text
-        .normalize("NFD") // separa acento da letra
-        .replace(/[\u0300-\u036f]/g, ""); // remove acentos
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
 }
 
 // API
 async function fetchWeather(query) {
     try {
         locationEl.textContent = 'Carregando...';
-        weatherInfo.classList.add('hidden');
+
+        // 🆕 mostrar card + skeleton
+        weatherInfo.classList.remove('hidden');
+        skeleton.style.display = 'block';
+        realContent.style.display = 'none';
 
         const url = `${API_BASE}/current.json?key=${API_KEY}&q=${encodeURIComponent(query)}&aqi=no`;
         const response = await fetch(url);
@@ -40,8 +48,14 @@ async function fetchWeather(query) {
 
         const data = await response.json();
         displayWeather(data);
+
     } catch (error) {
         locationEl.textContent = 'Erro: ' + error.message;
+
+        // 🆕 esconder skeleton em caso de erro
+        skeleton.style.display = 'none';
+        realContent.style.display = 'none';
+
         console.error('API Error:', error);
     }
 }
@@ -57,6 +71,10 @@ function displayWeather(data) {
     regionEl.textContent = loc.region;
     tempEl.textContent = Math.round(curr.temp_c);
     feelslikeEl.textContent = Math.round(curr.feelslike_c) + '°';
+
+    // 🆕 trocar skeleton pelo conteúdo real
+    skeleton.style.display = 'none';
+    realContent.style.display = 'block';
 
     weatherInfo.classList.remove('hidden');
 }
