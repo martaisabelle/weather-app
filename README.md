@@ -4,7 +4,7 @@
 
 Aplicação web de clima com geolocalização automática, busca global de cidades e animações contextuais.
 
-**Demo:** [weather-app-eight-ashen-97.vercel.app](https://weather-app-eight-ashen-97.vercel.app/)
+**Demo:** [Weather App](https://weather-3yrh6mq1p-marta-isabelles-projects.vercel.app/)
 
 ## Sobre o projeto
 
