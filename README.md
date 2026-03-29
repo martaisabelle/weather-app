@@ -15,7 +15,6 @@ Criei esta aplicação para praticar consumo de APIs REST com JavaScript puro. O
 - **Geolocalização automática** — detecta a cidade do usuário via HTML5 Geolocation API
 - **Botão de relocalização** — permite retornar à localização atual a qualquer momento
 - **Busca global com autocomplete** — sugere cidades em tempo real com debounce de 260ms; aceita nomes em português ou inglês
-- **Busca bilíngue e multi-variante** — cada pesquisa dispara até 3 queries em paralelo: original com acento, sem acento e tradução PT→EN. Garante que "Mossoró", "mossoro" e "Coreia do Norte" encontrem os resultados corretos
 - **Correção de nomes brasileiros** — a API de busca não armazena acentos; um mapa local corrige automaticamente "Sao Paulo" → "São Paulo", "Mossoro" → "Mossoró", "Paraiba" → "Paraíba" e todos os 26 estados
 - **Navegação por teclado** — autocomplete navegável com ↑ ↓ Enter Escape
 - **Ícones SVG inline** — 14 condições climáticas cobertas com ícones vetoriais próprios: ensolarado, noite clara, parcialmente nublado, nublado, neblina, chuvisco, chuva, chuva forte, tempestade, granizo, neve, chuva com gelo e mais
@@ -35,7 +34,6 @@ Criei esta aplicação para praticar consumo de APIs REST com JavaScript puro. O
 - Desenhar e animar elementos em `<canvas>` com controle de FPS e pausa por visibilidade (`visibilitychange`)
 - Criar ícones SVG do zero mapeados para os códigos WMO (World Meteorological Organization)
 - Implementar debounce, navegação por teclado e UX de autocomplete sem bibliotecas
-- Fazer deploy em produção com Vercel
 
 ## Stack
 
