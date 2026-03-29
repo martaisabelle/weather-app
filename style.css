@@ -1,224 +1,515 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap');
 
-* {
+/* ── Variables ── */
+:root {
+    --glass-bg: rgba(255, 255, 255, 0.07);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-hover: rgba(255, 255, 255, 0.12);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.65);
+    --text-muted: rgba(255, 255, 255, 0.4);
+    --accent: #7cd4fd;
+    --accent-glow: rgba(124, 212, 253, 0.25);
+    --radius-lg: 24px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Reset ── */
+*, *::before, *::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* ── Base ── */
 body {
-    font-family: 'Inter', sans-serif;
-    background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+    font-family: 'DM Sans', sans-serif;
+    background: linear-gradient(135deg, #0d1117 0%, #161b27 50%, #0f1923 100%);
     background-image: url('assets/background.jpg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
     min-height: 100vh;
-    color: #ffffff;
+    color: var(--text-primary);
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 20px;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ── Layout ── */
+.app-wrapper {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .container {
-    max-width: 400px;
+    max-width: 420px;
     width: 100%;
-    backdrop-filter: blur(20px);
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 24px;
-    padding: 40px 30px;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(24px) saturate(1.4);
+    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    background: var(--glass-bg);
+    border-radius: var(--radius-lg);
+    padding: 44px 32px 36px;
+    box-shadow:
+        0 32px 64px rgba(0, 0, 0, 0.5),
+        0 0 0 1px var(--glass-border) inset,
+        0 1px 0 rgba(255,255,255,0.08) inset;
     text-align: center;
-    animation: fadeIn 0.8s ease-out;
+    animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(28px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Header ── */
+header {
+    margin-bottom: 28px;
 }
 
 header h1 {
-    font-size: 2.2rem;
-    font-weight: 600;
-    margin-bottom: 8px;
-    background: linear-gradient(135deg, #ffffff, #e0e0e0);
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.6rem;
+    font-weight: 400;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+    background: linear-gradient(160deg, #ffffff 30%, rgba(255,255,255,0.7));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
-header p {
-    font-size: 1rem;
-    opacity: 0.8;
+.location-text {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
     font-weight: 300;
+    letter-spacing: 0.01em;
+    min-height: 1.3em;
+    transition: var(--transition);
 }
 
+/* ── Search ── */
 .search-box {
-    display: flex;
-    margin: 30px 0;
-    gap: 10px;
     position: relative;
+    margin-bottom: 20px;
+}
+
+.input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 14px;
+    width: 16px;
+    height: 16px;
+    color: var(--text-muted);
+    pointer-events: none;
+    flex-shrink: 0;
+    transition: color 0.2s;
 }
 
 #cityInput {
-    flex: 1;
-    padding: 14px 20px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    color: #fff;
-    font-size: 1rem;
+    width: 100%;
+    padding: 13px 44px 13px 40px;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-primary);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 400;
     backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
+    transition: var(--transition);
+    appearance: none;
 }
 
 #cityInput::placeholder {
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--text-muted);
 }
 
 #cityInput:focus {
     outline: none;
-    border-color: rgba(255, 255, 255, 0.4);
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    border-color: rgba(124, 212, 253, 0.4);
+    background: rgba(255, 255, 255, 0.09);
+    box-shadow: 0 0 0 3px rgba(124, 212, 253, 0.1);
 }
 
-#searchBtn {
-    padding: 14px 24px;
+#cityInput:focus + .search-icon,
+.input-wrap:focus-within .search-icon {
+    color: var(--accent);
+}
+
+.clear-btn {
+    position: absolute;
+    right: 12px;
+    width: 24px;
+    height: 24px;
+    background: rgba(255,255,255,0.1);
     border: none;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #87CEEB 0%, #1E3A8A 100%);
-    color: white;
-    font-weight: 500;
+    border-radius: 50%;
+    color: var(--text-secondary);
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 5px 15px rgba(30, 58, 138, 0.4);
-}
-
-#searchBtn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(124, 205, 236, 0.4);
-}
-
-#searchBtn:active {
-    transform: scale(0.97);
-}
-
-/* WEATHER CARD - TAMANHO FIXO */
-.weather-card {
-    margin: 30px 0;
-    padding: 40px 20px;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    
-    /* TAMANHO FIXO 240px */
-    height: 240px;
     display: flex;
-    flex-direction:  column;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    padding: 0;
+}
+
+.clear-btn svg {
+    width: 12px;
+    height: 12px;
+}
+
+.clear-btn:hover {
+    background: rgba(255,255,255,0.2);
+    color: var(--text-primary);
+}
+
+/* ── Autocomplete ── */
+.autocomplete-list {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: rgba(18, 24, 38, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    z-index: 100;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    animation: dropDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dropDown {
+    from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.autocomplete-list:empty {
+    display: none;
+}
+
+.autocomplete-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    text-align: left;
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.active {
+    background: rgba(124, 212, 253, 0.1);
+}
+
+.autocomplete-item .ac-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
+}
+
+.autocomplete-item .ac-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.autocomplete-item .ac-region {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+}
+
+/* ── Weather Card ── */
+.weather-card {
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(12px);
+    padding: 28px 20px 24px;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    margin-bottom: 8px;
 }
 
 .weather-card.hidden {
     opacity: 0;
-    transform: scale(0.95);
+    transform: scale(0.97);
+    pointer-events: none;
 }
 
-.temp-primary {
-    font-size: 4.5rem;
+/* ── Weather Icon ── */
+.weather-icon-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+#weatherIcon {
+    width: 56px;
+    height: 56px;
+    filter: drop-shadow(0 4px 12px rgba(124, 212, 253, 0.3));
+    animation: iconFloat 3s ease-in-out infinite;
+}
+
+@keyframes iconFloat {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-4px); }
+}
+
+.condition-text {
+    font-size: 0.8rem;
+    color: var(--text-muted);
     font-weight: 300;
-    margin-bottom: 10px;
-    line-height: 1;
-    letter-spacing: -2px;
+    letter-spacing: 0.03em;
+    text-transform: lowercase;
 }
 
-#unit {
-    font-size: 2rem;
-    opacity: 0.8;
+/* ── Temperature ── */
+.temp-primary {
+    font-family: 'DM Serif Display', serif;
+    font-size: 5rem;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -3px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.degree-unit {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 300;
+    opacity: 0.7;
+    letter-spacing: 0;
+    margin-top: 12px;
+    margin-left: 4px;
 }
 
 .feelslike {
-    font-size: 1.2rem;
-    opacity: 0.9;
-    margin-bottom: 20px;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    font-weight: 300;
+    margin-bottom: 14px;
+    letter-spacing: 0.01em;
 }
 
+#feelslike {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+/* ── Details ── */
 .details p {
-    font-size: 1.4rem;
+    font-size: 1.1rem;
     font-weight: 400;
-    line-height: 1.3;
-    max-width: 280px;
-    word-wrap: break-word;
-    text-align: center;
+    color: var(--text-primary);
+    line-height: 1.4;
+    margin-bottom: 16px;
 }
 
 #city {
     font-weight: 500;
 }
 
-footer {
-    margin-top: 30px;
-    font-size: 0.85rem;
-    opacity: 0.6;
+.region-sep, #region {
+    color: var(--text-secondary);
     font-weight: 300;
 }
 
-footer small {
-    font-size: 0.75rem;
-    opacity: 0.7;
+/* ── Extra Details Pills ── */
+.extra-details {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 4px;
 }
 
-/* SKELETON */
-.skeleton {
-    background: linear-gradient(90deg, rgba(255,255,255,0.08) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.08) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
+.detail-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--glass-border);
     border-radius: 12px;
-    margin: 12px auto;
+    padding: 10px 14px;
+    min-width: 72px;
 }
 
-.skeleton-temp { 
-    width: 120px; 
-    height: 70px; 
-    margin: 0 auto 16px; 
-    border-radius: 16px; 
+.detail-pill svg {
+    width: 16px;
+    height: 16px;
+    color: var(--accent);
+    margin-bottom: 2px;
 }
 
-.skeleton-feelslike { 
-    width: 80%; 
-    height: 20px; 
-    margin: 0 auto 12px; 
+.detail-pill span {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
 }
 
-.skeleton-city { 
-    width: 70%; 
-    height: 24px; 
+.detail-pill small {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    font-weight: 300;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+/* ── Error State ── */
+.error-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+}
+
+.error-state svg {
+    width: 32px;
+    height: 32px;
+    color: rgba(255,100,100,0.7);
+    margin-bottom: 4px;
+}
+
+.error-state p {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.error-state small {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+/* ── Skeleton ── */
+.skeleton-card {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+}
+
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        rgba(255,255,255,0.05) 25%,
+        rgba(255,255,255,0.12) 50%,
+        rgba(255,255,255,0.05) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.6s infinite ease-in-out;
+    border-radius: 10px;
+}
+
+.skeleton-temp {
+    width: 110px;
+    height: 72px;
+    border-radius: 14px;
+}
+
+.skeleton-line {
+    width: 75%;
+    height: 18px;
+}
+
+.skeleton-line.small {
+    width: 50%;
+    height: 14px;
 }
 
 @keyframes shimmer {
-    0% { background-position: 200% 0; }
+    0%   { background-position: 200% 0; }
     100% { background-position: -200% 0; }
 }
 
-/* RESPONSIVO */
+/* ── Footer ── */
+footer {
+    margin-top: 24px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-weight: 300;
+    line-height: 1.7;
+}
+
+footer small {
+    font-size: 0.72rem;
+    opacity: 0.8;
+}
+
+/* ── Responsive ── */
 @media (max-width: 480px) {
-    .container { 
-        padding: 30px 20px; 
-        margin: 10px; 
+    .container {
+        padding: 32px 22px 28px;
+        border-radius: 20px;
     }
-    .temp-primary { font-size: 3.5rem; }
-    header h1 { font-size: 1.8rem; }
-    .search-box { 
-        flex-direction: column; 
-        gap: 12px; 
+
+    header h1 {
+        font-size: 2.2rem;
     }
-    #searchBtn { width: 100%; }
+
+    .temp-primary {
+        font-size: 4rem;
+    }
+
+    .extra-details {
+        gap: 6px;
+    }
+
+    .detail-pill {
+        min-width: 64px;
+        padding: 8px 10px;
+    }
 }
 
 @media (max-width: 360px) {
-    .temp-primary { font-size: 3rem; }
+    .temp-primary {
+        font-size: 3.5rem;
+    }
+
+    .detail-pill {
+        min-width: 58px;
+    }
 }
