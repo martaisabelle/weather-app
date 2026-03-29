@@ -47,6 +47,9 @@ function removeAccents(text) {
     return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
+// A WeatherAPI não armazena acentos em muitos nomes brasileiros.
+// Este mapa corrige o nome exibido: "Sao Paulo" → "São Paulo".
+// Chave: nome sem acento em lowercase. Valor: nome correto com acento.
 const brNameFix = {
     'mossoro': 'Mossoró',
     'sao paulo': 'São Paulo',
@@ -201,6 +204,11 @@ function translateQuery(query) {
 async function searchCities(query) {
     const translated = translateQuery(query);
     const noAccent   = removeAccents(query);
+
+    // Sempre manda até 3 variantes em paralelo:
+    // 1. Original (com acento, ex: "mossoró")
+    // 2. Sem acento (ex: "mossoro") — WeatherAPI às vezes só acha assim
+    // 3. Traduzida para inglês (ex: "Coreia do Norte" → "North Korea")
     const querySet = new Set([query, noAccent]);
     if (translated.toLowerCase() !== query.toLowerCase()) querySet.add(translated);
 
@@ -894,7 +902,8 @@ function getGeolocation(onDone) {
             onDone && onDone();
         },
         () => {
-            locationEl.textContent = 'Permita localização ou busque manualmente';
+            showError('Busque uma cidade manualmente');
+            locationEl.textContent = 'Localização não permitida';
             onDone && onDone();
         },
         { enableHighAccuracy: true, timeout: 10000 }
