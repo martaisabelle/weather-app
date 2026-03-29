@@ -55,6 +55,4 @@ cd weather-app
 open index.html
 ```
 
-> A API key já está no código para facilitar testes. Em produção, o ideal é movê-la para uma variável de ambiente com um proxy serverless.
-
 Feito por **Marta Isabelle**
