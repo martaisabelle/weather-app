@@ -47,9 +47,6 @@ function removeAccents(text) {
     return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
-// A WeatherAPI não armazena acentos em muitos nomes brasileiros.
-// Este mapa corrige o nome exibido: "Sao Paulo" → "São Paulo".
-// Chave: nome sem acento em lowercase. Valor: nome correto com acento.
 const brNameFix = {
     'mossoro': 'Mossoró',
     'sao paulo': 'São Paulo',
@@ -102,6 +99,28 @@ const brNameFix = {
     'araraquara': 'Araraquara',
     'presidente prudente': 'Presidente Prudente',
     'sao carlos': 'São Carlos',
+    'paraiba': 'Paraíba',
+    'rio grande do norte': 'Rio Grande do Norte',
+    'rio grande do sul': 'Rio Grande do Sul',
+    'espirito santo': 'Espírito Santo',
+    'maranhao': 'Maranhão',
+    'piaui': 'Piauí',
+    'ceara': 'Ceará',
+    'pernambuco': 'Pernambuco',
+    'alagoas': 'Alagoas',
+    'sergipe': 'Sergipe',
+    'bahia': 'Bahia',
+    'minas gerais': 'Minas Gerais',
+    'sao paulo': 'São Paulo',
+    'parana': 'Paraná',
+    'santa catarina': 'Santa Catarina',
+    'mato grosso': 'Mato Grosso',
+    'mato grosso do sul': 'Mato Grosso do Sul',
+    'rondonia': 'Rondônia',
+    'roraima': 'Roraima',
+    'amapa': 'Amapá',
+    'tocantins': 'Tocantins',
+    'acre': 'Acre',
     'apodi': 'Apodi',
     'pau dos ferros': 'Pau dos Ferros',
     'acu': 'Açu',
@@ -182,11 +201,6 @@ function translateQuery(query) {
 async function searchCities(query) {
     const translated = translateQuery(query);
     const noAccent   = removeAccents(query);
-
-    // Sempre manda até 3 variantes em paralelo:
-    // 1. Original (com acento, ex: "mossoró")
-    // 2. Sem acento (ex: "mossoro") — WeatherAPI às vezes só acha assim
-    // 3. Traduzida para inglês (ex: "Coreia do Norte" → "North Korea")
     const querySet = new Set([query, noAccent]);
     if (translated.toLowerCase() !== query.toLowerCase()) querySet.add(translated);
 
