@@ -52,7 +52,7 @@ Sem frameworks, sem bundlers, sem dependências de terceiros em runtime.
 ## Como rodar localmente
 
 ```bash
-git clone https://github.com/seu-usuario/weather-app.git
+git clone https://github.com/martaisabelle/weather-app.git
 cd weather-app
 # Abra index.html no navegador — não precisa de servidor
 open index.html
