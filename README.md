@@ -6,13 +6,9 @@ Aplicação web de clima com geolocalização automática, busca global de cidad
 
 **Demo:** [weather-app-eight-ashen-97.vercel.app](https://weather-app-eight-ashen-97.vercel.app/)
 
----
-
 ## Sobre o projeto
 
 Criei esta aplicação para praticar consumo de APIs REST com JavaScript puro. O que começou como um exercício simples evoluiu para um projeto com busca inteligente, ícones climáticos SVG customizados e animações em canvas — tudo sem frameworks.
-
----
 
 ## Funcionalidades
 
@@ -28,8 +24,6 @@ Criei esta aplicação para praticar consumo de APIs REST com JavaScript puro. O
 - **Design responsivo** — funciona em mobile, tablet e desktop
 - **Acessibilidade** — `aria-live`, `aria-label`, `role="listbox"`, `prefers-reduced-motion`
 
----
-
 ## O que aprendi
 
 - Consumir e encadear múltiplas chamadas a uma API REST (busca → resultado → clima por coordenadas)
@@ -39,8 +33,6 @@ Criei esta aplicação para praticar consumo de APIs REST com JavaScript puro. O
 - Criar ícones SVG do zero para representar condições climáticas
 - Implementar debounce, navegação por teclado e UX de autocomplete sem bibliotecas
 - Fazer deploy em produção com Vercel
-
----
 
 ## Stack
 | Camada | Tecnologia |
@@ -54,8 +46,6 @@ Criei esta aplicação para praticar consumo de APIs REST com JavaScript puro. O
 
 Sem frameworks, sem bundlers, sem dependências de terceiros em runtime.
 
----
-
 ## Como rodar localmente
 
 ```bash
@@ -66,7 +56,5 @@ open index.html
 ```
 
 > A API key já está no código para facilitar testes. Em produção, o ideal é movê-la para uma variável de ambiente com um proxy serverless.
-
----
 
 Feito por **Marta Isabelle**
