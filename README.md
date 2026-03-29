@@ -43,7 +43,7 @@ Criei esta aplicação para praticar consumo de APIs REST com JavaScript puro. O
 | Estilo | CSS3 — glassmorphism, variáveis CSS, animações |
 | Lógica | Vanilla JavaScript (ES2022) |
 | Busca de cidades | [WeatherAPI.com](https://www.weatherapi.com/) — endpoint `/search` |
-| Clima atual | [Open-Meteo](https://open-meteo.com/) — gratuito, sem API key, padrão WMO |
+| Clima atual | [Open-Meteo](https://open-meteo.com/) — sem API key, padrão WMO |
 | Fontes | Google Fonts — DM Serif Display + DM Sans |
 | Deploy | Vercel |
 
