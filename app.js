@@ -1,12 +1,15 @@
-// WeatherAPI.com — app.js
-// Endpoints:
-//   Search:  /v1/search.json?key=KEY&q=QUERY
-//   Current: /v1/current.json?key=KEY&q=lat,lon&aqi=no
+// app.js
+// Busca de cidades: WeatherAPI /v1/search.json (mantida — Open-Meteo não tem busca por nome)
+// Clima atual:      Open-Meteo /v1/forecast    (gratuito, sem API key, WMO weather codes)
 
 'use strict';
 
-const API_KEY  = 'f2e7f458da914ce296831541262303';
-const API_BASE = 'https://api.weatherapi.com/v1';
+// Busca de cidades (WeatherAPI — só para o autocomplete)
+const SEARCH_KEY  = 'f2e7f458da914ce296831541262303';
+const SEARCH_BASE = 'https://api.weatherapi.com/v1';
+
+// Clima (Open-Meteo) — sem API key
+const METEO_BASE = 'https://api.open-meteo.com/v1';
 
 // ── DOM ──────────────────────────────────────────────────────────
 const cityInput     = document.getElementById('cityInput');
@@ -33,39 +36,89 @@ const autocomplete  = document.getElementById('autocompleteList');
 const canvas        = document.getElementById('weatherCanvas');
 const ctx           = canvas.getContext('2d');
 
-let autocompleteTimer = null;
-let activeIndex       = -1;
-let lastSearchResults = [];
-let animFrame         = null;
-let currentWeatherCode = null;
+let autocompleteTimer  = null;
+let activeIndex        = -1;
+let lastSearchResults  = [];
+let animFrame          = null;
+let canvasConditionType = null;
 
-// ── Encoding ──────────────────────────────────────────────────────
-// A WeatherAPI devolve nomes já em UTF-8 correto na maioria dos casos.
-// O problema histórico era o uso de escape() que corrompia acentos.
-// Aqui simplesmente retornamos o texto como veio — a API já traz
-// "São Paulo", "Mossoró", "João Pessoa" etc. corretamente.
-// Só aplicamos a correção de Latin-1→UTF-8 quando detectamos garbage.
-function fixEncoding(text) {
-    if (!text) return '';
-    // Detecta padrão de double-encoding (ex: "SÃ£o" → "São")
-    // Apenas tenta se houver sequências Ã seguidas de caractere Latin-1
-    if (/Ã[\x80-\xBF]/.test(text)) {
-        try {
-            const bytes = new Uint8Array([...text].map(c => c.charCodeAt(0) & 0xFF));
-            const decoded = new TextDecoder('utf-8').decode(bytes);
-            if (!decoded.includes('\uFFFD')) return decoded;
-        } catch { /* ignora */ }
-    }
-    return text;
-}
-
+// ── Encoding ─────────────────────────────────────────────────────
 function removeAccents(text) {
     return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
-// ── Tradução PT→EN para cobertura global ──────────────────────────
+// A WeatherAPI não armazena acentos em muitos nomes brasileiros.
+// Este mapa corrige o nome exibido: "Sao Paulo" → "São Paulo".
+// Chave: nome sem acento em lowercase. Valor: nome correto com acento.
+const brNameFix = {
+    'mossoro': 'Mossoró',
+    'sao paulo': 'São Paulo',
+    'joao pessoa': 'João Pessoa',
+    'maceio': 'Maceió',
+    'goiania': 'Goiânia',
+    'belem': 'Belém',
+    'cuiaba': 'Cuiabá',
+    'vitoria': 'Vitória',
+    'florianopolis': 'Florianópolis',
+    'sao luis': 'São Luís',
+    'maringa': 'Maringá',
+    'niteroi': 'Niterói',
+    'nova iguacu': 'Nova Iguaçu',
+    'ribeirao preto': 'Ribeirão Preto',
+    'uberlandia': 'Uberlândia',
+    'sao jose dos campos': 'São José dos Campos',
+    'sao jose': 'São José',
+    'sao bernardo do campo': 'São Bernardo do Campo',
+    'sao goncalo': 'São Gonçalo',
+    'sao caetano do sul': 'São Caetano do Sul',
+    'sao jose do rio preto': 'São José do Rio Preto',
+    'sao paulo do potengi': 'São Paulo do Potengi',
+    'jundiai': 'Jundiaí',
+    'marilia': 'Marília',
+    'guaruja': 'Guarujá',
+    'carapicuiba': 'Carapicuíba',
+    'macapa': 'Macapá',
+    'santarem': 'Santarém',
+    'maraba': 'Marabá',
+    'parnaiba': 'Parnaíba',
+    'tiangua': 'Tianguá',
+    'quixada': 'Quixadá',
+    'caico': 'Caicó',
+    'palmas': 'Palmas',
+    'joao monlevade': 'João Monlevade',
+    'petropolis': 'Petrópolis',
+    'angra dos reis': 'Angra dos Reis',
+    'arraial do cabo': 'Arraial do Cabo',
+    'rio de janeiro': 'Rio de Janeiro',
+    'brasilia': 'Brasília',
+    'sao sebastiao': 'São Sebastião',
+    'sao vicente': 'São Vicente',
+    'mogi das cruzes': 'Mogi das Cruzes',
+    'praia grande': 'Praia Grande',
+    'itaquaquecetuba': 'Itaquaquecetuba',
+    'piracicaba': 'Piracicaba',
+    'tatui': 'Tatuí',
+    'botucatu': 'Botucatu',
+    'araraquara': 'Araraquara',
+    'presidente prudente': 'Presidente Prudente',
+    'sao carlos': 'São Carlos',
+    'apodi': 'Apodi',
+    'pau dos ferros': 'Pau dos Ferros',
+    'acu': 'Açu',
+    'currais novos': 'Currais Novos',
+    'jardim do serido': 'Jardim do Seridó',
+};
+
+// Corrige o nome de uma cidade usando o mapa acima.
+// Se não encontrar, devolve o original.
+function fixCityName(name) {
+    if (!name) return '';
+    const key = removeAccents(name.toLowerCase().trim());
+    return brNameFix[key] || name;
+}
+
+// ── Tradução PT→EN para cobertura global ─────────────────────────
 const ptToEn = {
-    // Países/regiões com nome muito diferente em PT
     'coreia do norte': 'North Korea',
     'coreia do sul': 'South Korea',
     'estados unidos': 'United States',
@@ -118,35 +171,42 @@ const ptToEn = {
 };
 
 function translateQuery(query) {
-    // Remove acentos para lookup
+    // Remove acentos só para fazer lookup no dicionário ptToEn
     const noAccent = removeAccents(query.toLowerCase().trim());
     if (ptToEn[noAccent]) return ptToEn[noAccent];
-    // Fallback: devolve sem acento (melhora match na API p/ nomes em inglês)
-    return removeAccents(query);
+    // Se não está no dicionário, devolve o original COM acento.
+    return query;
 }
 
-// ── Search ───────────────────────────────────────────────────────
+// ── Search (WeatherAPI) ──────────────────────────────────────────
 async function searchCities(query) {
     const translated = translateQuery(query);
-    // Queries: original + traduzido (sem duplicar se forem iguais)
-    const queries = [query];
-    if (translated.toLowerCase() !== query.toLowerCase()) queries.push(translated);
+    const noAccent   = removeAccents(query);
 
-    const reqs = queries.map(q =>
-        fetch(`${API_BASE}/search.json?key=${API_KEY}&q=${encodeURIComponent(q)}`)
+    // Sempre manda até 3 variantes em paralelo:
+    // 1. Original (com acento, ex: "mossoró")
+    // 2. Sem acento (ex: "mossoro") — WeatherAPI às vezes só acha assim
+    // 3. Traduzida para inglês (ex: "Coreia do Norte" → "North Korea")
+    const querySet = new Set([query, noAccent]);
+    if (translated.toLowerCase() !== query.toLowerCase()) querySet.add(translated);
+
+    const reqs = [...querySet].map(q =>
+        fetch(`${SEARCH_BASE}/search.json?key=${SEARCH_KEY}&q=${encodeURIComponent(q)}`)
             .then(r => r.ok ? r.json() : [])
             .catch(() => [])
     );
 
     const arrays = await Promise.all(reqs);
 
-    // Deduplica por id
     const seen   = new Set();
     const merged = [];
     for (const arr of arrays) {
         for (const item of arr) {
             if (!seen.has(item.id)) {
                 seen.add(item.id);
+                // Corrige o nome antes de armazenar no resultado
+                item.name   = fixCityName(item.name);
+                item.region = fixCityName(item.region);
                 merged.push(item);
             }
         }
@@ -154,7 +214,7 @@ async function searchCities(query) {
     return merged;
 }
 
-// ── Autocomplete render ───────────────────────────────────────────
+// ── Autocomplete ─────────────────────────────────────────────────
 function renderAutocomplete(results) {
     autocomplete.innerHTML = '';
     activeIndex = -1;
@@ -162,9 +222,9 @@ function renderAutocomplete(results) {
     if (!results.length) return;
 
     results.slice(0, 6).forEach((item, i) => {
-        const city    = fixEncoding(item.name);
-        const region  = fixEncoding(item.region);
-        const country = fixEncoding(item.country);
+        const city    = item.name   || '';
+        const region  = item.region || '';
+        const country = item.country || '';
         const flag    = countryFlag(item.country_code);
 
         const div = document.createElement('div');
@@ -172,8 +232,9 @@ function renderAutocomplete(results) {
         div.setAttribute('role', 'option');
         div.dataset.index = i;
 
-        // flag: só emoji se válido (sem 📍 como fallback)
-        const flagHtml = flag ? `<span class="ac-flag">${flag}</span>` : `<span class="ac-flag"></span>`;
+        const flagHtml = flag
+            ? `<span class="ac-flag">${flag}</span>`
+            : `<span class="ac-flag"></span>`;
 
         div.innerHTML = `
             ${flagHtml}
@@ -190,17 +251,13 @@ function renderAutocomplete(results) {
     });
 }
 
-// Emoji de bandeira (Unicode Regional Indicator)
-// Retorna string vazia se o código não for válido — sem fallback de emoji
 function countryFlag(code) {
     if (!code || code.length !== 2) return '';
     try {
         return [...code.toUpperCase()].map(
             c => String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65)
         ).join('');
-    } catch {
-        return '';
-    }
+    } catch { return ''; }
 }
 
 function clearAutocomplete() {
@@ -213,10 +270,10 @@ function selectCity(item) {
     cityInput.value = '';
     showClearBtn(false);
     clearAutocomplete();
-    fetchWeatherByCoords(item.lat, item.lon);
+    fetchWeatherByCoords(item.lat, item.lon, item.name, item.region, item.country);
 }
 
-// ── Keyboard nav ──────────────────────────────────────────────────
+// ── Keyboard nav ─────────────────────────────────────────────────
 cityInput.addEventListener('keydown', e => {
     const items = autocomplete.querySelectorAll('.autocomplete-item');
 
@@ -253,7 +310,7 @@ function updateActive(items) {
     items.forEach((el, i) => el.classList.toggle('active', i === activeIndex));
 }
 
-// ── Input / clear ─────────────────────────────────────────────────
+// ── Input / clear ────────────────────────────────────────────────
 cityInput.addEventListener('input', () => {
     const q = cityInput.value.trim();
     showClearBtn(q.length > 0);
@@ -282,13 +339,12 @@ function showClearBtn(show) {
     clearBtn.style.display = show ? 'flex' : 'none';
 }
 
-// Botão de geolocalização
 geoBtn.addEventListener('click', () => {
     geoBtn.style.opacity = '0.5';
     getGeolocation(() => { geoBtn.style.opacity = '1'; });
 });
 
-// ── UI States ─────────────────────────────────────────────────────
+// ── UI States ────────────────────────────────────────────────────
 function showSkeleton() {
     skeleton.style.display     = 'flex';
     realContent.style.display  = 'none';
@@ -299,10 +355,7 @@ function showWeather() {
     skeleton.style.display     = 'none';
     errorContent.style.display = 'none';
     realContent.style.display  = 'flex';
-    // Fade-in
-    requestAnimationFrame(() => {
-        realContent.style.opacity = '1';
-    });
+    requestAnimationFrame(() => { realContent.style.opacity = '1'; });
 }
 
 function showError(msg) {
@@ -314,7 +367,7 @@ function showError(msg) {
     locationEl.textContent = '';
 }
 
-// ── Fetch ─────────────────────────────────────────────────────────
+// ── Fetch ────────────────────────────────────────────────────────
 async function fetchWeather(query) {
     try {
         locationEl.textContent = 'Buscando...';
@@ -323,75 +376,119 @@ async function fetchWeather(query) {
         const results = await searchCities(query);
         if (!results.length) throw new Error('Cidade não encontrada');
 
-        await fetchWeatherByCoords(results[0].lat, results[0].lon);
+        const best = results[0];
+        await fetchWeatherByCoords(best.lat, best.lon, best.name, best.region, best.country);
     } catch (err) {
         showError(err.message);
     }
 }
 
-async function fetchWeatherByCoords(lat, lon) {
+// Busca clima na Open-Meteo.
+// name/region/country são opcionais — quando vêm da geolocalização,
+// buscamos o nome reverso via WeatherAPI search com as coordenadas.
+async function fetchWeatherByCoords(lat, lon, name, region, country) {
     try {
         locationEl.textContent = 'Carregando...';
         showSkeleton();
         realContent.style.opacity = '0';
 
-        const url = `${API_BASE}/current.json?key=${API_KEY}&q=${lat},${lon}&aqi=no`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('Erro ao obter clima');
+        // Open-Meteo: clima atual + máx/mín do dia
+        // WMO weather_code, is_day, temp, sensação, umidade, vento, UV
+        const meteoUrl = `${METEO_BASE}/forecast`
+            + `?latitude=${lat}&longitude=${lon}`
+            + `&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,uv_index,weather_code,is_day`
+            + `&daily=temperature_2m_max,temperature_2m_min`
+            + `&timezone=auto`;
 
-        const data = await res.json();
-        displayWeather(data);
+        // Se não temos o nome (geolocalização), buscamos via WeatherAPI reverse geocode
+        let cityName    = name;
+        let cityRegion  = region;
+        let cityCountry = country;
+
+        const [meteoRes, geoRes] = await Promise.all([
+            fetch(meteoUrl),
+            (!name)
+                ? fetch(`${SEARCH_BASE}/search.json?key=${SEARCH_KEY}&q=${lat},${lon}`)
+                    .then(r => r.ok ? r.json() : []).catch(() => [])
+                : Promise.resolve(null),
+        ]);
+
+        if (!meteoRes.ok) throw new Error('Erro ao obter clima');
+        const meteo = await meteoRes.json();
+
+        // Resolve nome quando veio da geolocalização
+        if (!name && Array.isArray(geoRes) && geoRes.length) {
+            cityName    = fixCityName(geoRes[0].name);
+            cityRegion  = fixCityName(geoRes[0].region);
+            cityCountry = geoRes[0].country || '';
+        } else if (!name) {
+            cityName = `${parseFloat(lat).toFixed(2)}, ${parseFloat(lon).toFixed(2)}`;
+            cityRegion  = '';
+            cityCountry = '';
+        }
+
+        displayWeather(meteo, cityName, cityRegion, cityCountry);
     } catch (err) {
         showError(err.message);
     }
 }
 
-// ── Display ───────────────────────────────────────────────────────
-function displayWeather(data) {
-    const loc  = data.location;
-    const curr = data.current;
+// ── Display ──────────────────────────────────────────────────────
+function displayWeather(meteo, city, region, country) {
+    const curr  = meteo.current;
+    const daily = meteo.daily;
 
-    const city    = fixEncoding(loc.name);
-    const region  = fixEncoding(loc.region);
-    const country = fixEncoding(loc.country);
-
+    // Header
     locationEl.textContent = city + (region ? `, ${region}` : '');
-
     cityEl.textContent   = city;
-    regionEl.textContent = region || country;
+    regionEl.textContent = region || country || '';
 
-    tempEl.textContent      = Math.round(curr.temp_c);
-    feelslikeEl.textContent = Math.round(curr.feelslike_c) + '°';
-    humidityEl.textContent  = (curr.humidity ?? '--') + '%';
-    windEl.textContent      = Math.round(curr.wind_kph ?? 0);
-    uvEl.textContent        = curr.uv ?? '--';
+    // Temperatura — Open-Meteo: temperature_2m, apparent_temperature
+    tempEl.textContent      = Math.round(curr.temperature_2m);
+    feelslikeEl.textContent = Math.round(curr.apparent_temperature) + '°';
 
-    // Máx/mín do dia (se disponível na resposta, senão usa margem da temp atual)
-    const hi = curr.temp_c + 3;
-    const lo = curr.temp_c - 4;
-    maxTempEl.textContent = Math.round(hi) + '°';
-    minTempEl.textContent = Math.round(lo) + '°';
+    // Detalhes
+    humidityEl.textContent = (curr.relative_humidity_2m ?? '--') + '%';
+    windEl.textContent     = Math.round(curr.wind_speed_10m ?? 0);
+    uvEl.textContent       = curr.uv_index != null ? Math.round(curr.uv_index) : '--';
 
-    // Ícone SVG e condição
-    const code = curr.condition?.code ?? 1000;
+    // Máx/Mín reais do dia (daily[0] = hoje)
+    if (daily && daily.temperature_2m_max && daily.temperature_2m_min) {
+        maxTempEl.textContent = Math.round(daily.temperature_2m_max[0]) + '°';
+        minTempEl.textContent = Math.round(daily.temperature_2m_min[0]) + '°';
+    }
+
+    // WMO weather_code + is_day
+    const code  = curr.weather_code ?? 0;
     const isDay = curr.is_day ?? 1;
-    currentWeatherCode = code;
 
     const { svg, label } = getWeatherIcon(code, isDay);
     svgIconEl.innerHTML = svg;
     conditionEl.textContent = label;
 
-    // Canvas animation
     startCanvasAnimation(code, isDay);
-
     showWeather();
 }
 
-// ── SVG Weather Icons ─────────────────────────────────────────────
-// Ícones SVG inline totalmente customizados — não dependem de imagens externas
+// ── SVG Weather Icons (WMO codes) ────────────────────────────────
+// Referência WMO: https://open-meteo.com/en/docs#weathervariables
+// 0        = céu limpo
+// 1,2,3    = principalmente limpo, parcialmente nublado, nublado
+// 45,48    = neblina
+// 51,53,55 = chuvisco leve/mod/denso
+// 56,57    = chuvisco com gelo
+// 61,63,65 = chuva leve/mod/forte
+// 66,67    = chuva com gelo
+// 71,73,75 = neve leve/mod/forte
+// 77       = grãos de neve
+// 80,81,82 = pancadas de chuva leve/mod/forte
+// 85,86    = pancadas de neve
+// 95       = trovoada
+// 96,99    = trovoada com granizo
+
 function getWeatherIcon(code, isDay) {
-    // Ensolarado / Limpo
-    if (code === 1000) {
+    // 0 — Céu limpo
+    if (code === 0) {
         if (isDay) return {
             label: 'ensolarado',
             svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -419,8 +516,8 @@ function getWeatherIcon(code, isDay) {
         };
     }
 
-    // Parcialmente nublado
-    if ([1003].includes(code)) {
+    // 1,2 — Principalmente limpo / parcialmente nublado
+    if (code === 1 || code === 2) {
         if (isDay) return {
             label: 'parcialmente nublado',
             svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -447,8 +544,8 @@ function getWeatherIcon(code, isDay) {
         };
     }
 
-    // Nublado / Encoberto
-    if ([1006, 1009].includes(code)) return {
+    // 3 — Nublado / encoberto
+    if (code === 3) return {
         label: 'nublado',
         svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="10" y="28" width="44" height="22" rx="11" fill="white" opacity="0.6"/>
@@ -458,8 +555,8 @@ function getWeatherIcon(code, isDay) {
         </svg>`
     };
 
-    // Neblina / Névoa / Nevoeiro
-    if ([1030, 1135, 1147].includes(code)) return {
+    // 45, 48 — Neblina
+    if (code === 45 || code === 48) return {
         label: 'neblina',
         svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
             <g stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.6">
@@ -471,20 +568,8 @@ function getWeatherIcon(code, isDay) {
         </svg>`
     };
 
-    // Vento forte / Rajadas
-    if ([1201, 1204, 1207, 1255, 1258].includes(code)) return {
-        label: 'vento forte',
-        svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g stroke="white" stroke-width="2.2" stroke-linecap="round" opacity="0.7">
-                <path d="M8 22H40C43.3 22 46 19.3 46 16C46 12.7 43.3 10 40 10C36.7 10 34 12.7 34 16"/>
-                <path d="M8 32H46C49.3 32 52 34.7 52 38C52 41.3 49.3 44 46 44C42.7 44 40 41.3 40 38"/>
-                <path d="M8 42H32C35.3 42 38 44.7 38 48C38 51.3 35.3 54 32 54C28.7 54 26 51.3 26 48"/>
-            </g>
-        </svg>`
-    };
-
-    // Chuvisco leve
-    if ([1150, 1153, 1168, 1171].includes(code)) return {
+    // 51, 53, 55, 56, 57 — Chuvisco
+    if (code >= 51 && code <= 57) return {
         label: 'chuvisco',
         svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="12" y="12" width="40" height="22" rx="11" fill="white" opacity="0.65"/>
@@ -498,8 +583,8 @@ function getWeatherIcon(code, isDay) {
         </svg>`
     };
 
-    // Chuva leve a moderada
-    if ([1063, 1180, 1183, 1186, 1189, 1240].includes(code)) return {
+    // 61, 63, 80, 81 — Chuva leve / moderada
+    if (code === 61 || code === 63 || code === 80 || code === 81) return {
         label: 'chuva',
         svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="10" y="10" width="44" height="22" rx="11" fill="white" opacity="0.65"/>
@@ -514,8 +599,8 @@ function getWeatherIcon(code, isDay) {
         </svg>`
     };
 
-    // Chuva forte
-    if ([1192, 1195, 1243, 1246].includes(code)) return {
+    // 65, 82 — Chuva forte
+    if (code === 65 || code === 82) return {
         label: 'chuva forte',
         svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="8" y="8" width="48" height="22" rx="11" fill="#94a3b8" opacity="0.7"/>
@@ -531,66 +616,9 @@ function getWeatherIcon(code, isDay) {
         </svg>`
     };
 
-    // Tempestade / Trovoada
-    if ([1087, 1273, 1276, 1279, 1282].includes(code)) return {
-        label: 'tempestade',
-        svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="8" y="6" width="48" height="22" rx="11" fill="#475569" opacity="0.8"/>
-            <circle cx="18" cy="11" r="10" fill="#475569" opacity="0.8"/>
-            <circle cx="42" cy="10" r="9" fill="#475569" opacity="0.8"/>
-            <g stroke="#60a5fa" stroke-width="2" stroke-linecap="round" opacity="0.7">
-                <line x1="18" y1="34" x2="15" y2="42"/>
-                <line x1="44" y1="34" x2="41" y2="42"/>
-            </g>
-            <path d="M38 30L30 44H36L28 58L46 40H38Z" fill="#FBBF24" opacity="0.95"/>
-        </svg>`
-    };
-
-    // Granizo
-    if ([1237, 1261, 1264].includes(code)) return {
-        label: 'granizo',
-        svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="10" y="8" width="44" height="22" rx="11" fill="#94a3b8" opacity="0.7"/>
-            <circle cx="20" cy="13" r="10" fill="#94a3b8" opacity="0.7"/>
-            <circle cx="40" cy="12" r="8" fill="#94a3b8" opacity="0.7"/>
-            <g fill="white" opacity="0.85">
-                <circle cx="20" cy="42" r="3"/>
-                <circle cx="32" cy="46" r="3"/>
-                <circle cx="44" cy="42" r="3"/>
-                <circle cx="26" cy="54" r="3"/>
-                <circle cx="38" cy="54" r="3"/>
-            </g>
-        </svg>`
-    };
-
-    // Neve
-    if ([1066, 1114, 1117, 1210, 1213, 1216, 1219, 1222, 1225, 1255, 1258].includes(code)) return {
-        label: 'neve',
-        svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="10" y="6" width="44" height="20" rx="10" fill="white" opacity="0.55"/>
-            <circle cx="20" cy="11" r="9" fill="white" opacity="0.55"/>
-            <circle cx="40" cy="10" r="7" fill="white" opacity="0.55"/>
-            <g stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.85">
-                <!-- floco 1 -->
-                <line x1="20" y1="36" x2="20" y2="50"/>
-                <line x1="13" y1="39" x2="27" y2="47"/>
-                <line x1="27" y1="39" x2="13" y2="47"/>
-                <circle cx="20" cy="36" r="1.5" fill="white"/>
-                <circle cx="20" cy="50" r="1.5" fill="white"/>
-                <!-- floco 2 -->
-                <line x1="42" y1="38" x2="42" y2="50"/>
-                <line x1="36" y1="41" x2="48" y2="47"/>
-                <line x1="48" y1="41" x2="36" y2="47"/>
-                <circle cx="42" cy="38" r="1.5" fill="white"/>
-                <circle cx="42" cy="50" r="1.5" fill="white"/>
-            </g>
-        </svg>`
-    };
-
-    // Nascer / Pôr do sol — não é um código de condição, mas ícone decorativo disponível
-    // Chuva com trovoada leve
-    if ([1072, 1249, 1252].includes(code)) return {
-        label: 'chuva com granizo',
+    // 66, 67 — Chuva com gelo
+    if (code === 66 || code === 67) return {
+        label: 'chuva com gelo',
         svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="10" y="8" width="44" height="20" rx="10" fill="#64748b" opacity="0.7"/>
             <circle cx="20" cy="13" r="9" fill="#64748b" opacity="0.7"/>
@@ -606,7 +634,59 @@ function getWeatherIcon(code, isDay) {
         </svg>`
     };
 
-    // Fallback genérico — nuvem simples
+    // 71, 73, 75, 77, 85, 86 — Neve
+    if (code === 71 || code === 73 || code === 75 || code === 77 || code === 85 || code === 86) return {
+        label: 'neve',
+        svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="6" width="44" height="20" rx="10" fill="white" opacity="0.55"/>
+            <circle cx="20" cy="11" r="9" fill="white" opacity="0.55"/>
+            <circle cx="40" cy="10" r="7" fill="white" opacity="0.55"/>
+            <g stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.85">
+                <line x1="20" y1="36" x2="20" y2="50"/>
+                <line x1="13" y1="39" x2="27" y2="47"/>
+                <line x1="27" y1="39" x2="13" y2="47"/>
+                <circle cx="20" cy="36" r="1.5" fill="white"/>
+                <circle cx="20" cy="50" r="1.5" fill="white"/>
+                <line x1="42" y1="38" x2="42" y2="50"/>
+                <line x1="36" y1="41" x2="48" y2="47"/>
+                <line x1="48" y1="41" x2="36" y2="47"/>
+                <circle cx="42" cy="38" r="1.5" fill="white"/>
+                <circle cx="42" cy="50" r="1.5" fill="white"/>
+            </g>
+        </svg>`
+    };
+
+    // 95 — Trovoada
+    if (code === 95) return {
+        label: 'tempestade',
+        svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="8" y="6" width="48" height="22" rx="11" fill="#475569" opacity="0.8"/>
+            <circle cx="18" cy="11" r="10" fill="#475569" opacity="0.8"/>
+            <circle cx="42" cy="10" r="9" fill="#475569" opacity="0.8"/>
+            <g stroke="#60a5fa" stroke-width="2" stroke-linecap="round" opacity="0.7">
+                <line x1="18" y1="34" x2="15" y2="42"/>
+                <line x1="44" y1="34" x2="41" y2="42"/>
+            </g>
+            <path d="M38 30L30 44H36L28 58L46 40H38Z" fill="#FBBF24" opacity="0.95"/>
+        </svg>`
+    };
+
+    // 96, 99 — Trovoada com granizo
+    if (code === 96 || code === 99) return {
+        label: 'tempestade c/ granizo',
+        svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="8" y="6" width="48" height="20" rx="10" fill="#334155" opacity="0.85"/>
+            <circle cx="18" cy="11" r="10" fill="#334155" opacity="0.85"/>
+            <circle cx="42" cy="10" r="9" fill="#334155" opacity="0.85"/>
+            <path d="M36 28L28 40H34L26 56L44 38H36Z" fill="#FBBF24" opacity="0.9"/>
+            <g fill="white" opacity="0.75">
+                <circle cx="48" cy="40" r="2.5"/>
+                <circle cx="52" cy="48" r="2.5"/>
+            </g>
+        </svg>`
+    };
+
+    // Fallback
     return {
         label: 'variável',
         svg: `<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -617,10 +697,20 @@ function getWeatherIcon(code, isDay) {
     };
 }
 
-// ── Canvas Animation ──────────────────────────────────────────────
-// Animação sutil e contextual no fundo do card (30fps, pausa fora da tela)
+// ── Canvas Animation ─────────────────────────────────────────────
+// WMO code → tipo de animação
+function classifyCondition(code, isDay) {
+    if (code === 0 && isDay)  return 'sunny';
+    if (code === 0 && !isDay) return 'night';
+    if (code <= 3)            return 'cloudy';
+    if (code === 45 || code === 48) return 'fog';
+    if (code === 95 || code === 96 || code === 99) return 'thunder';
+    if ((code >= 71 && code <= 77) || code === 85 || code === 86) return 'snow';
+    if (code >= 51) return 'rain'; // chuva, chuvisco, pancadas
+    return 'clear';
+}
+
 const particles = [];
-let canvasConditionType = null;
 
 function startCanvasAnimation(code, isDay) {
     if (animFrame) cancelAnimationFrame(animFrame);
@@ -634,18 +724,6 @@ function startCanvasAnimation(code, isDay) {
     animateCanvas(type);
 }
 
-function classifyCondition(code, isDay) {
-    if (code === 1000 && isDay) return 'sunny';
-    if (code === 1000 && !isDay) return 'night';
-    if ([1003, 1006, 1009].includes(code)) return 'cloudy';
-    if ([1030, 1135, 1147].includes(code)) return 'fog';
-    if ([1087, 1273, 1276, 1279, 1282].includes(code)) return 'thunder';
-    if ([1114, 1117, 1210, 1213, 1216, 1219, 1222, 1225].includes(code)) return 'snow';
-    // qualquer chuva
-    if (code >= 1063 && code <= 1282) return 'rain';
-    return 'clear';
-}
-
 function resizeCanvas() {
     canvas.width  = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
@@ -654,26 +732,23 @@ function resizeCanvas() {
 function initParticles(type) {
     const W = canvas.width;
     const H = canvas.height;
-    const count = type === 'rain' ? 40
-                : type === 'snow' ? 24
-                : type === 'sunny' ? 12
-                : type === 'night' ? 20
-                : type === 'fog' ? 6
+    const count = type === 'rain'   ? 40
+                : type === 'snow'   ? 24
+                : type === 'sunny'  ? 12
+                : type === 'night'  ? 20
                 : 0;
 
     for (let i = 0; i < count; i++) {
         if (type === 'rain') {
             particles.push({
-                x: Math.random() * W,
-                y: Math.random() * H,
+                x: Math.random() * W, y: Math.random() * H,
                 len: 8 + Math.random() * 10,
                 speed: 4 + Math.random() * 4,
                 opacity: 0.15 + Math.random() * 0.25,
             });
         } else if (type === 'snow') {
             particles.push({
-                x: Math.random() * W,
-                y: Math.random() * H,
+                x: Math.random() * W, y: Math.random() * H,
                 r: 1.5 + Math.random() * 2,
                 speed: 0.3 + Math.random() * 0.5,
                 drift: (Math.random() - 0.5) * 0.4,
@@ -681,8 +756,7 @@ function initParticles(type) {
             });
         } else if (type === 'sunny') {
             particles.push({
-                x: Math.random() * W,
-                y: Math.random() * H,
+                x: Math.random() * W, y: Math.random() * H,
                 r: 1 + Math.random() * 2,
                 speed: 0.1 + Math.random() * 0.2,
                 opacity: 0.06 + Math.random() * 0.1,
@@ -690,8 +764,7 @@ function initParticles(type) {
             });
         } else if (type === 'night') {
             particles.push({
-                x: Math.random() * W,
-                y: Math.random() * (H * 0.6),
+                x: Math.random() * W, y: Math.random() * (H * 0.6),
                 r: 0.8 + Math.random() * 1.5,
                 opacity: 0.2 + Math.random() * 0.5,
                 twinkle: Math.random() * Math.PI * 2,
@@ -706,7 +779,6 @@ const TARGET_FPS = 30;
 const FRAME_MS   = 1000 / TARGET_FPS;
 
 function animateCanvas(type) {
-    // Pausa se fora da viewport
     if (document.hidden) {
         animFrame = requestAnimationFrame(() => animateCanvas(type));
         return;
@@ -771,7 +843,6 @@ function animateCanvas(type) {
             ctx.restore();
         }
     } else if (type === 'thunder') {
-        // Flash aleatório muito raro
         if (Math.random() < 0.004) {
             ctx.save();
             ctx.fillStyle = 'rgba(255, 240, 100, 0.04)';
@@ -779,16 +850,13 @@ function animateCanvas(type) {
             ctx.restore();
         }
     }
-    // fog: sem partículas, só o blur do glassmorphism já ajuda
 
     animFrame = requestAnimationFrame(() => animateCanvas(type));
 }
 
-// Pausa animação quando aba não está visível
 document.addEventListener('visibilitychange', () => {
     if (document.hidden && animFrame) cancelAnimationFrame(animFrame);
-    else if (!document.hidden && canvasConditionType)
-        animateCanvas(canvasConditionType);
+    else if (!document.hidden && canvasConditionType) animateCanvas(canvasConditionType);
 });
 
 window.addEventListener('resize', () => {
@@ -797,7 +865,7 @@ window.addEventListener('resize', () => {
     if (canvasConditionType) initParticles(canvasConditionType);
 });
 
-// ── Geolocation ───────────────────────────────────────────────────
+// ── Geolocation ──────────────────────────────────────────────────
 function getGeolocation(onDone) {
     if (!navigator.geolocation) {
         locationEl.textContent = 'Busque uma cidade manualmente';
@@ -807,7 +875,8 @@ function getGeolocation(onDone) {
 
     navigator.geolocation.getCurrentPosition(
         async ({ coords }) => {
-            await fetchWeatherByCoords(coords.latitude, coords.longitude);
+            // Sem nome pré-definido — fetchWeatherByCoords vai buscar via reverse geocode
+            await fetchWeatherByCoords(coords.latitude, coords.longitude, null, null, null);
             onDone && onDone();
         },
         () => {
@@ -818,6 +887,6 @@ function getGeolocation(onDone) {
     );
 }
 
-// ── Init ──────────────────────────────────────────────────────────
-showSkeleton(); // mostra skeleton desde o início (altura fixa do card)
+// ── Init ─────────────────────────────────────────────────────────
+showSkeleton();
 getGeolocation();
