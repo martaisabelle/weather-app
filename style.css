@@ -2,26 +2,21 @@
 
 /* ── Variables ── */
 :root {
-    --glass-bg: rgba(255, 255, 255, 0.07);
-    --glass-border: rgba(255, 255, 255, 0.12);
-    --glass-hover: rgba(255, 255, 255, 0.12);
+    --glass-bg: rgba(255,255,255,0.10);
+    --glass-border: rgba(255,255,255,0.13);
     --text-primary: #ffffff;
-    --text-secondary: rgba(255, 255, 255, 0.65);
-    --text-muted: rgba(255, 255, 255, 0.4);
-    --accent: #7cd4fd;
-    --accent-glow: rgba(124, 212, 253, 0.25);
-    --radius-lg: 24px;
+    --text-secondary: rgba(255,255,255,0.6);
+    --text-muted: rgba(255,255,255,0.35);
+    --accent: #93d8f8;
+    --radius-lg: 22px;
     --radius-md: 14px;
-    --radius-sm: 10px;
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Altura FIXA do card — nunca muda */
+    --card-height: 420px;
 }
 
 /* ── Reset ── */
-*, *::before, *::after {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
 /* ── Base ── */
 body {
@@ -40,7 +35,7 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-/* ── Layout ── */
+/* ── App Wrapper ── */
 .app-wrapper {
     width: 100%;
     display: flex;
@@ -51,54 +46,28 @@ body {
 .container {
     max-width: 420px;
     width: 100%;
-    backdrop-filter: blur(24px) saturate(1.4);
-    -webkit-backdrop-filter: blur(24px) saturate(1.4);
-    background: var(--glass-bg);
-    border-radius: var(--radius-lg);
-    padding: 44px 32px 36px;
+    backdrop-filter: blur(28px) saturate(1.5);
+    -webkit-backdrop-filter: blur(28px) saturate(1.5);
+    background: rgba(12, 18, 30, 0.55);
+    border-radius: 26px;
+    padding: 28px 28px 24px;
     box-shadow:
-        0 32px 64px rgba(0, 0, 0, 0.5),
-        0 0 0 1px var(--glass-border) inset,
-        0 1px 0 rgba(255,255,255,0.08) inset;
+        0 32px 80px rgba(0,0,0,0.6),
+        0 0 0 1px rgba(255,255,255,0.10) inset,
+        0 1px 0 rgba(255,255,255,0.07) inset;
     text-align: center;
-    animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: slideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes slideUp {
-    from { opacity: 0; transform: translateY(28px) scale(0.97); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* ── Header ── */
-header {
-    margin-bottom: 28px;
-}
-
-header h1 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 2.6rem;
-    font-weight: 400;
-    letter-spacing: -0.5px;
-    margin-bottom: 6px;
-    background: linear-gradient(160deg, #ffffff 30%, rgba(255,255,255,0.7));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.location-text {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    font-weight: 300;
-    letter-spacing: 0.01em;
-    min-height: 1.3em;
-    transition: var(--transition);
+    from { opacity:0; transform:translateY(24px) scale(0.97); }
+    to   { opacity:1; transform:translateY(0) scale(1); }
 }
 
 /* ── Search ── */
 .search-box {
     position: relative;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .input-wrap {
@@ -109,128 +78,112 @@ header h1 {
 
 .search-icon {
     position: absolute;
-    left: 14px;
+    left: 13px;
     width: 16px;
     height: 16px;
     color: var(--text-muted);
     pointer-events: none;
-    flex-shrink: 0;
     transition: color 0.2s;
+    flex-shrink: 0;
 }
 
 #cityInput {
     width: 100%;
-    padding: 13px 44px 13px 40px;
+    /* espaço: esquerda p/ ícone busca, direita p/ clear + geo */
+    padding: 12px 72px 12px 38px;
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255,255,255,0.06);
     color: var(--text-primary);
     font-family: 'DM Sans', sans-serif;
-    font-size: 0.95rem;
+    font-size: 0.93rem;
     font-weight: 400;
     backdrop-filter: blur(10px);
-    transition: var(--transition);
+    transition: background 0.25s, border-color 0.25s;
     appearance: none;
+    /* SEM box-shadow/ring no focus — removido por pedido */
 }
 
-#cityInput::placeholder {
-    color: var(--text-muted);
-}
+#cityInput::placeholder { color: var(--text-muted); }
 
+/* Focus: só sutileza, sem anel azul */
 #cityInput:focus {
     outline: none;
-    border-color: rgba(124, 212, 253, 0.4);
-    background: rgba(255, 255, 255, 0.09);
-    box-shadow: 0 0 0 3px rgba(124, 212, 253, 0.1);
+    border-color: rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.09);
 }
 
-#cityInput:focus + .search-icon,
-.input-wrap:focus-within .search-icon {
-    color: var(--accent);
-}
+.input-wrap:focus-within .search-icon { color: rgba(255,255,255,0.55); }
 
-.clear-btn {
+/* Botões de ícone no input */
+.icon-btn {
     position: absolute;
-    right: 12px;
-    width: 24px;
-    height: 24px;
-    background: rgba(255,255,255,0.1);
+    width: 28px;
+    height: 28px;
+    background: transparent;
     border: none;
-    border-radius: 50%;
+    border-radius: 8px;
     color: var(--text-secondary);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: var(--transition);
+    transition: color 0.2s, background 0.2s;
     padding: 0;
+    flex-shrink: 0;
 }
+.icon-btn svg { width: 16px; height: 16px; }
+.icon-btn:hover { color: var(--text-primary); background: rgba(255,255,255,0.08); }
 
-.clear-btn svg {
-    width: 12px;
-    height: 12px;
-}
-
-.clear-btn:hover {
-    background: rgba(255,255,255,0.2);
-    color: var(--text-primary);
-}
+.clear-btn { right: 36px; }
+.geo-btn   { right: 6px; }
 
 /* ── Autocomplete ── */
 .autocomplete-list {
     position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    right: 0;
-    background: rgba(18, 24, 38, 0.95);
+    top: calc(100% + 5px);
+    left: 0; right: 0;
+    background: rgba(14, 20, 34, 0.97);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
     overflow: hidden;
     z-index: 100;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
-    animation: dropDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.55);
+    animation: dropDown 0.18s cubic-bezier(0.16,1,0.3,1);
 }
+.autocomplete-list:empty { display: none; }
 
 @keyframes dropDown {
-    from { opacity: 0; transform: translateY(-6px) scale(0.98); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-.autocomplete-list:empty {
-    display: none;
+    from { opacity:0; transform:translateY(-5px) scale(0.98); }
+    to   { opacity:1; transform:translateY(0) scale(1); }
 }
 
 .autocomplete-item {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 11px 16px;
+    padding: 11px 15px;
     cursor: pointer;
-    transition: background 0.15s;
     border-bottom: 1px solid rgba(255,255,255,0.04);
     text-align: left;
+    transition: background 0.12s;
 }
-
-.autocomplete-item:last-child {
-    border-bottom: none;
-}
-
+.autocomplete-item:last-child { border-bottom: none; }
 .autocomplete-item:hover,
-.autocomplete-item.active {
-    background: rgba(124, 212, 253, 0.1);
-}
+.autocomplete-item.active { background: rgba(255,255,255,0.07); }
 
-.autocomplete-item .ac-icon {
+.ac-flag {
     font-size: 1.1rem;
-    flex-shrink: 0;
-    width: 20px;
+    width: 22px;
     text-align: center;
+    flex-shrink: 0;
+    /* Sem 📍 — quando não há bandeira, espaço vazio */
+    min-width: 22px;
 }
-
-.autocomplete-item .ac-name {
-    font-size: 0.9rem;
+.ac-name {
+    font-size: 0.88rem;
     font-weight: 500;
     color: var(--text-primary);
     flex: 1;
@@ -238,189 +191,51 @@ header h1 {
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
-.autocomplete-item .ac-region {
-    font-size: 0.78rem;
+.ac-region {
+    font-size: 0.76rem;
     color: var(--text-muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 120px;
+    max-width: 130px;
 }
 
-/* ── Weather Card ── */
+/* ── Weather Card — ALTURA FIXA ── */
 .weather-card {
+    position: relative;
     border-radius: 18px;
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255,255,255,0.07);
     border: 1px solid var(--glass-border);
-    backdrop-filter: blur(12px);
-    padding: 28px 20px 24px;
-    min-height: 220px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    overflow: hidden;
+
+    /* Altura fixa — nada muda o tamanho do card */
+    height: var(--card-height);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    margin-bottom: 8px;
+
+    margin-bottom: 12px;
+    transition: none; /* sem transição de tamanho */
 }
 
-.weather-card.hidden {
-    opacity: 0;
-    transform: scale(0.97);
+/* Canvas climático */
+#weatherCanvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     pointer-events: none;
+    opacity: 0.45;
+    z-index: 0;
 }
 
-/* ── Weather Icon ── */
-.weather-icon-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    margin-bottom: 8px;
-}
-
-#weatherIcon {
-    width: 56px;
-    height: 56px;
-    filter: drop-shadow(0 4px 12px rgba(124, 212, 253, 0.3));
-    animation: iconFloat 3s ease-in-out infinite;
-}
-
-@keyframes iconFloat {
-    0%, 100% { transform: translateY(0); }
-    50%       { transform: translateY(-4px); }
-}
-
-.condition-text {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    font-weight: 300;
-    letter-spacing: 0.03em;
-    text-transform: lowercase;
-}
-
-/* ── Temperature ── */
-.temp-primary {
-    font-family: 'DM Serif Display', serif;
-    font-size: 5rem;
-    font-weight: 400;
-    line-height: 1;
-    letter-spacing: -3px;
-    margin-bottom: 4px;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-}
-
-.degree-unit {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 1.6rem;
-    font-weight: 300;
-    opacity: 0.7;
-    letter-spacing: 0;
-    margin-top: 12px;
-    margin-left: 4px;
-}
-
-.feelslike {
-    font-size: 0.88rem;
-    color: var(--text-secondary);
-    font-weight: 300;
-    margin-bottom: 14px;
-    letter-spacing: 0.01em;
-}
-
-#feelslike {
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
-/* ── Details ── */
-.details p {
-    font-size: 1.1rem;
-    font-weight: 400;
-    color: var(--text-primary);
-    line-height: 1.4;
-    margin-bottom: 16px;
-}
-
-#city {
-    font-weight: 500;
-}
-
-.region-sep, #region {
-    color: var(--text-secondary);
-    font-weight: 300;
-}
-
-/* ── Extra Details Pills ── */
-.extra-details {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-top: 4px;
-}
-
-.detail-pill {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid var(--glass-border);
-    border-radius: 12px;
-    padding: 10px 14px;
-    min-width: 72px;
-}
-
-.detail-pill svg {
-    width: 16px;
-    height: 16px;
-    color: var(--accent);
-    margin-bottom: 2px;
-}
-
-.detail-pill span {
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
-.detail-pill small {
-    font-size: 0.68rem;
-    color: var(--text-muted);
-    font-weight: 300;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-}
-
-/* ── Error State ── */
-.error-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    padding: 12px;
-}
-
-.error-state svg {
-    width: 32px;
-    height: 32px;
-    color: rgba(255,100,100,0.7);
-    margin-bottom: 4px;
-}
-
-.error-state p {
-    font-size: 0.95rem;
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
-.error-state small {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-}
+/* Todos os filhos ficam acima do canvas */
+.skeleton-card,
+.real-content,
+.error-state { position: relative; z-index: 1; }
 
 /* ── Skeleton ── */
 .skeleton-card {
@@ -428,88 +243,243 @@ header h1 {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    padding: 8px 0;
+    gap: 14px;
+    padding: 32px 28px;
 }
 
 .skeleton {
     background: linear-gradient(
         90deg,
         rgba(255,255,255,0.05) 25%,
-        rgba(255,255,255,0.12) 50%,
+        rgba(255,255,255,0.13) 50%,
         rgba(255,255,255,0.05) 75%
     );
     background-size: 200% 100%;
     animation: shimmer 1.6s infinite ease-in-out;
     border-radius: 10px;
 }
-
-.skeleton-temp {
-    width: 110px;
-    height: 72px;
-    border-radius: 14px;
+.sk-icon  { width: 56px; height: 56px; border-radius: 50%; }
+.sk-temp  { width: 120px; height: 72px; border-radius: 14px; }
+.sk-line  { width: 72%; height: 16px; }
+.sk-line.small { width: 48%; height: 13px; }
+.sk-pills-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    width: 100%;
 }
-
-.skeleton-line {
-    width: 75%;
-    height: 18px;
-}
-
-.skeleton-line.small {
-    width: 50%;
-    height: 14px;
-}
+.sk-pill  { flex: 1; max-width: 90px; height: 62px; border-radius: 12px; }
 
 @keyframes shimmer {
     0%   { background-position: 200% 0; }
     100% { background-position: -200% 0; }
 }
 
-/* ── Footer ── */
-footer {
-    margin-top: 24px;
+/* ── Real Content ── */
+.real-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 24px 24px;
+    gap: 0;
+    /* Fade-in suave */
+    transition: opacity 0.35s ease;
+}
+
+/* ── Weather SVG Icon ── */
+.weather-icon-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.weather-svg-icon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 4px 16px rgba(147, 216, 248, 0.25));
+    animation: iconFloat 4s ease-in-out infinite;
+}
+.weather-svg-icon svg { width: 100%; height: 100%; }
+
+@keyframes iconFloat {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-5px); }
+}
+
+.condition-text {
     font-size: 0.78rem;
     color: var(--text-muted);
     font-weight: 300;
-    line-height: 1.7;
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
 }
 
-footer small {
-    font-size: 0.72rem;
-    opacity: 0.8;
+/* ── Temperature ── */
+.temp-primary {
+    font-family: 'DM Serif Display', serif;
+    font-size: 5.2rem;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -4px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    /* tabular-nums: evita "pulo" ao trocar dígitos */
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.4);
 }
+
+.degree-unit {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 300;
+    opacity: 0.65;
+    letter-spacing: 0;
+    margin-top: 14px;
+    margin-left: 3px;
+}
+
+/* ── Sensação ── */
+.feelslike-row {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 300;
+    margin-bottom: 6px;
+}
+.feelslike-row span {
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+/* ── Localização ── */
+.location-row {
+    font-size: 1rem;
+    color: var(--text-primary);
+    font-weight: 400;
+    margin-bottom: 18px;
+    line-height: 1.3;
+    max-width: 90%;
+}
+.location-row strong { font-weight: 600; }
+.sep, #region { color: var(--text-secondary); font-weight: 300; }
+
+/* ── Pills ── */
+.extra-details {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 14px;
+}
+
+.detail-pill {
+    flex: 1;
+    max-width: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.09);
+    border-radius: 14px;
+    padding: 13px 10px 11px;
+    transition: background 0.2s;
+}
+.detail-pill:hover { background: rgba(255,255,255,0.11); }
+
+.detail-pill svg {
+    width: 20px;
+    height: 20px;
+    color: var(--accent);
+    opacity: 0.85;
+    margin-bottom: 2px;
+}
+
+.detail-pill span {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.detail-pill small {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1;
+}
+
+/* ── Máx / Mín ── */
+.minmax-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 300;
+}
+.minmax-row strong { font-weight: 500; color: var(--text-primary); }
+.minmax-sep { opacity: 0.3; }
+
+/* ── Error ── */
+.error-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+    padding: 20px;
+}
+.error-state svg { width: 34px; height: 34px; color: rgba(255,110,110,0.7); }
+.error-state p { font-size: 0.95rem; font-weight: 500; }
+.error-state small { font-size: 0.78rem; color: var(--text-muted); }
+
+/* ── Location text (abaixo do card) ── */
+.location-text {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-weight: 300;
+    letter-spacing: 0.01em;
+    min-height: 1.2em;
+    margin-bottom: 16px;
+    transition: color 0.3s;
+}
+
+/* ── Footer ── */
+footer {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    font-weight: 300;
+    line-height: 1.6;
+}
+footer small { opacity: 0.75; }
 
 /* ── Responsive ── */
 @media (max-width: 480px) {
-    .container {
-        padding: 32px 22px 28px;
-        border-radius: 20px;
-    }
-
-    header h1 {
-        font-size: 2.2rem;
-    }
-
-    .temp-primary {
-        font-size: 4rem;
-    }
-
-    .extra-details {
-        gap: 6px;
-    }
-
-    .detail-pill {
-        min-width: 64px;
-        padding: 8px 10px;
-    }
+    .container { padding: 22px 18px 20px; border-radius: 20px; }
+    :root { --card-height: 400px; }
+    .temp-primary { font-size: 4.2rem; }
+    .detail-pill span { font-size: 0.9rem; }
+}
+@media (max-width: 360px) {
+    :root { --card-height: 390px; }
+    .temp-primary { font-size: 3.8rem; }
+    .extra-details { gap: 6px; }
+    .detail-pill { padding: 10px 7px 9px; }
 }
 
-@media (max-width: 360px) {
-    .temp-primary {
-        font-size: 3.5rem;
-    }
-
-    .detail-pill {
-        min-width: 58px;
-    }
+/* Respeita prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+    .weather-svg-icon { animation: none; }
+    #weatherCanvas { display: none; }
+    .container { animation: none; }
 }
