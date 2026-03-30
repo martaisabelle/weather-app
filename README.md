@@ -58,4 +58,4 @@ cd weather-app
 open index.html
 ```
 
-Feito por **Marta Isabelle**
+Desenvolvido por **Marta Isabelle**
